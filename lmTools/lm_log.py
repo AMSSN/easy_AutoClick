@@ -14,11 +14,19 @@ def log_init():
     logger.setLevel(logging.DEBUG)
 
     # 创建 TimedRotatingFileHandler，并设置文件名、滚动间隔和保留日志文件个数
-    handler = TimedRotatingFileHandler(filename=log_path + "/logfile.log", when="midnight", interval=1, backupCount=7)
-    handler.suffix = "%Y-%m-%d.log"
-    handler.encoding = "utf-8"
-    handler.setFormatter(logging.Formatter("[%(asctime)s - %(levelname)s] - %(message)s "))
-    logger.addHandler(handler)
+    file_handler = TimedRotatingFileHandler(filename=log_path + "/logfile.log", when="midnight", interval=1,
+                                            backupCount=7)
+    file_handler.suffix = "%Y-%m-%d.log"
+    file_handler.encoding = "utf-8"
+    file_handler.setFormatter(logging.Formatter("[%(asctime)s - %(levelname)s] - %(message)s "))
+    logger.addHandler(file_handler)
+
+    # 创建控制台处理器，输出日志到控制台
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)  # 控制台日志级别
+    console_handler.encoding = "utf-8"
+    console_handler.setFormatter(logging.Formatter("[%(asctime)s - %(levelname)s] - %(message)s "))
+    logger.addHandler(console_handler)
 
     # 输出日志
     logger.info("Logging file inited!")

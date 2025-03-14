@@ -6,9 +6,9 @@ from lmTools.lm_log import log_path, log_init
 import os
 
 print("Welcome to using lmTools", "\nPlease set value:log_path")
-lmlogger = log_init()
+logger = log_init()
 
 __all__ = ["os",  # 通用库
-           "log_path", "lmlogger",  # log相关
+           "log_path", "logger",  # log相关
            "set_value", "get_value"  # tools相关
            ]
