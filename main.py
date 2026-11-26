@@ -1,39 +1,55 @@
-import xlrd
-import time
-from utils import dataCheck, wholeWork
-import lmTools
+"""AutoClick 可视化流程编排器 —— 程序入口。
+
+用法：
+    python main.py
+"""
+
+from __future__ import annotations
+
+import os
+import sys
+import traceback
 
 
+def _ensure_path() -> None:
+    root = os.path.dirname(os.path.abspath(__file__))
+    if root not in sys.path:
+        sys.path.insert(0, root)
 
-if __name__ == '__main__':
-    logger = lmTools.get_value("logger")
-    logger.info("欢迎使用Auto-Click脚本(cover by不高兴就喝水牌RPA~)")
-    # 通过路径打开文件
-    try:
-        file = 'xlsInput/cmd.xls'
-        excel_file = xlrd.open_workbook(filename=file)
-        # 通过索引获取表格sheet页
-        sheet1 = excel_file.sheet_by_index(0)
-        # 大task之间的间隔(s)
-        taskDur = 1
-        # 数据检查
-        logger.info("check the sheet1 data...")
-        checkCmd = dataCheck(sheet1)
-        if checkCmd:
-            logger.info("check the sheet1 data success!")
-            key = input('选择功能:\n 1.只做一次 2.无限循环 \n')
-            if key == '1':
-                # 循环拿出每一行指令
-                wholeWork(sheet1)
-            elif key == '2':
-                while True:
-                    try:
-                        wholeWork(sheet1)
-                        logger.info("操作成功，等待" + str(taskDur) + "秒")
-                    except:
-                        logger.info("操作失败，等待" + str(taskDur) + "秒")
-                        time.sleep(taskDur)
-    except Exception as e:
-        logger.error(e)
-        logger.error("open excel file failed!")
-        print("failed!")
+
+def _install_excepthook() -> None:
+    def hook(exc_type, exc_value, exc_tb):
+        traceback.print_exception(exc_type, exc_value, exc_tb)
+        try:
+            from PySide6.QtWidgets import QApplication, QMessageBox
+
+            if QApplication.instance() is not None:
+                detail = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+                QMessageBox.critical(None, "未处理的异常", detail[-2000:])
+        except Exception:  # noqa: BLE001 - 异常钩子里不能再抛
+            pass
+
+    sys.excepthook = hook
+
+
+def main() -> int:
+    _ensure_path()
+    _install_excepthook()
+
+    from PySide6.QtWidgets import QApplication
+
+    from autolab.ui.main_window import MainWindow
+    from autolab.ui.theme import apply_theme
+
+    app = QApplication(sys.argv)
+    app.setApplicationName("AutoClick")
+    app.setApplicationDisplayName("AutoClick 可视化流程编排器")
+    apply_theme(app)
+
+    window = MainWindow()
+    window.show()
+    return app.exec()
+
+
+if __name__ == "__main__":
+    sys.exit(main())
